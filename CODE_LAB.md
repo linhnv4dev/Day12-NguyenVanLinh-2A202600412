@@ -167,6 +167,12 @@ curl http://localhost:8000/ask -X POST \
 ```bash
 docker images my-agent:develop
 ```
+```bash 
+docker images my-agent:develop 
+                                                            i Info →   U  In Use
+IMAGE              ID             DISK USAGE   CONTENT SIZE   EXTRA
+my-agent:develop   13bc8de8e8ba       1.15GB             0B    U  
+```
 
 ###  Exercise 2.3: Multi-stage build
 
@@ -275,12 +281,12 @@ railway domain
 Test:
 ```bash
 # Health check
-curl http://student-agent-domain/health
+curl https://aithucchienday12agentservice-production.up.railway.app/health
 
 # Agent endpoint
-curl http://studen-agent-domain/ask -X POST \
+curl https://aithucchienday12agentservice-production.up.railway.app/ask -X POST \
   -H "Content-Type: application/json" \
-  -d '{"question": ""}'
+  -d '{"question": "hi cậu"}'
 ```
 
 ###  Exercise 3.2: Deploy Render (15 phút)
@@ -353,7 +359,7 @@ curl http://localhost:8000/ask -X POST \
 
 #  Có key
 curl http://localhost:8000/ask -X POST \
-  -H "X-API-Key: secret-key-123" \
+  -H "X-API-Key: demo-key-change-in-production" \
   -H "Content-Type: application/json" \
   -d '{"question": "Hello"}'
 ```
@@ -370,14 +376,14 @@ cd ../production
 ```bash
 python app.py
 
-curl http://localhost:8000/token -X POST \
+curl http://localhost:8000/auth/token -X POST \
   -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "secret"}'
+  -d '{"username": "teacher", "password": "teach456"}'
 ```
 
 3. Dùng token để gọi API:
 ```bash
-TOKEN="<token_từ_bước_2>"
+TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZWFjaGVyIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzc2NDE4Njg3LCJleHAiOjE3NzY0MjIyODd9.SEtbOFTR_q3HRT3g_cfNVmcMeF16CTFWrUvvQXf_ouw"
 curl http://localhost:8000/ask -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \

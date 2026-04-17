@@ -54,7 +54,7 @@ python app.py
 
 ### So sánh với Basic:
 
-| | Basic (❌) | Advanced (✅) |
+| | Basic (❌) | Advanced (✅) |    
 |--|-----------|--------------|
 | Config | Hardcode trong code | Đọc từ env vars |
 | Secrets | `api_key = "sk-abc123"` | `os.getenv("OPENAI_API_KEY")` |

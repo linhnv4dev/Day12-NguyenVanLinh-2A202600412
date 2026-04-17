@@ -1,12 +1,12 @@
-#  Delivery Checklist — Day 12 Lab Submission
+# Delivery Checklist — Day 12 Lab Submission
 
-> **Student Name:** _________________________  
-> **Student ID:** _________________________  
-> **Date:** _________________________
+> **Student Name:** NGUYỄN VĂN LĨNH
+> **Student ID:** 2A202600412
+> **Date:** 17/04/2026
 
 ---
 
-##  Submission Requirements
+## Submission Requirements
 
 Submit a **GitHub repository** containing:
 
@@ -20,46 +20,65 @@ Create a file `MISSION_ANSWERS.md` with your answers to all exercises:
 ## Part 1: Localhost vs Production
 
 ### Exercise 1.1: Anti-patterns found
-1. [Your answer]
-2. [Your answer]
-...
+
+1. **API key hardcode:** Mật khẩu, key lưu trực tiếp trong code.
+2. **Không có Config Management:** Các thông số `DEBUG`, `DATABASE_URL` bị gán cứng.
+3. **Sử dụng lệnh `print()` để log:** Không có định dạng chuẩn.
+4. **Thiếu Health Check Endpoint:** Platform không biết ứng dụng còn sống hay đã treo.
+5. **Port và Host cố định:** Gắn cứng `localhost:8000`.
 
 ### Exercise 1.3: Comparison table
+
 | Feature | Develop | Production | Why Important? |
-|---------|---------|------------|----------------|
-| Config  | ...     | ...        | ...            |
-...
+| ------- | ------- | ---------- | -------------- |
+| Config  | Hardcode trong file | Env vars (Dùng Pydantic) | Bảo mật cao, linh hoạt deploy ở các môi trường khác nhau. |
+| Health check | Không có | Có `/health` và `/ready` | Orchestrator/Load Balancer cần biết app có đang hoạt động tốt hay không. |
+| Logging | `print()` thường | Structured JSON logging | Dễ dàng parse, tìm kiếm và phân tích lỗi. |
+| Shutdown | Đột ngột | Graceful Shutdown | Không mất data khi đóng kết nối. |
+| Host/Port| `localhost:8000` | `0.0.0.0`, port theo `PORT` | Nhận traffic từ bên ngoài container / proxy của Cloud. |
 
 ## Part 2: Docker
 
 ### Exercise 2.1: Dockerfile questions
-1. Base image: [Your answer]
-2. Working directory: [Your answer]
-...
+
+1. Base image: `python:3.11`
+2. Working directory: `/app`
+3. Tại sao COPY requirements.txt trước: Để tận dụng cơ chế Layer Cache của Docker.
+4. CMD vs ENTRYPOINT: `CMD` chỉ định tham số mặc định dễ bị ghi đè, `ENTRYPOINT` định nghĩa lệnh cố định.
 
 ### Exercise 2.3: Image size comparison
-- Develop: [X] MB
-- Production: [Y] MB
-- Difference: [Z]%
+
+- Develop: ~1.15 GB
+- Production: ~150 MB
+- Difference: ~87% nhỏ hơn
 
 ## Part 3: Cloud Deployment
 
 ### Exercise 3.1: Railway deployment
-- URL: https://your-app.railway.app
-- Screenshot: [Link to screenshot in repo]
+
+- URL: https://language-tutor-service-production.up.railway.app
+- Screenshot: [railway_screenshot.png](./railway_screenshot.png)
 
 ## Part 4: API Security
 
 ### Exercise 4.1-4.3: Test results
-[Paste your test outputs]
+
+```json
+{"question":"Test 1","answer":"Tôi là AI agent được deploy lên cloud...","usage":{"requests_remaining":98,"budget_remaining_usd":4e-05}}
+```
 
 ### Exercise 4.4: Cost guard implementation
-[Explain your approach]
+
+Sử dụng Redis để theo dõi chi phí theo `user_id`. Key trong Redis được lưu dạng `budget:{user_id}:{YYYY-MM}`. Mỗi lần nhận request, ta ước tính chi phí và dùng lệnh `INCRBYFLOAT` để cộng dồn vào key đó. Nếu tổng vượt quá ngân sách (ví dụ $10), trả về lỗi HTTP 402. Key có thiết lập expire 32 ngày để tự reset.
 
 ## Part 5: Scaling & Reliability
 
 ### Exercise 5.1-5.5: Implementation notes
-[Your explanations and test results]
+
+- **Health Checks:** Cài đặt endpoint `/health` và `/ready`.
+- **Graceful Shutdown:** Bắt tín hiệu `SIGTERM`. Báo cho Load Balancer ngừng gửi request mới.
+- **Stateless Design:** Chuyển lịch sử chat từ biến dictionary trong memory (RAM) lên Redis.
+- **Load Balancing:** Dùng Nginx phân phối traffic theo round-robin qua các instances Agent.
 ```
 
 ---
@@ -88,15 +107,16 @@ your-repo/
 ```
 
 **Requirements:**
--  All code runs without errors
--  Multi-stage Dockerfile (image < 500 MB)
--  API key authentication
--  Rate limiting (10 req/min)
--  Cost guard ($10/month)
--  Health + readiness checks
--  Graceful shutdown
--  Stateless design (Redis)
--  No hardcoded secrets
+
+- All code runs without errors
+- Multi-stage Dockerfile (image < 500 MB)
+- API key authentication
+- Rate limiting (10 req/min)
+- Cost guard ($10/month)
+- Health + readiness checks
+- Graceful shutdown
+- Stateless design (Redis)
+- No hardcoded secrets
 
 ---
 
@@ -104,55 +124,63 @@ your-repo/
 
 Create a file `DEPLOYMENT.md` with your deployed service information:
 
-```markdown
+````markdown
 # Deployment Information
 
 ## Public URL
-https://your-agent.railway.app
+
+https://language-tutor-service-production.up.railway.app
 
 ## Platform
+
 Railway / Render / Cloud Run
 
 ## Test Commands
 
 ### Health Check
+
 ```bash
-curl https://your-agent.railway.app/health
+curl https://language-tutor-service-production.up.railway.app/health
 # Expected: {"status": "ok"}
 ```
+````
 
 ### API Test (with authentication)
+
 ```bash
-curl -X POST https://your-agent.railway.app/ask \
+curl -X POST https://language-tutor-service-production.up.railway.app/ask \
   -H "X-API-Key: YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{"user_id": "test", "question": "Hello"}'
 ```
 
 ## Environment Variables Set
+
 - PORT
 - REDIS_URL
 - AGENT_API_KEY
 - LOG_LEVEL
 
 ## Screenshots
+
 - [Deployment dashboard](screenshots/dashboard.png)
 - [Service running](screenshots/running.png)
 - [Test results](screenshots/test.png)
-```
+
+````
 
 ##  Pre-Submission Checklist
 
-- [ ] Repository is public (or instructor has access)
-- [ ] `MISSION_ANSWERS.md` completed with all exercises
-- [ ] `DEPLOYMENT.md` has working public URL
-- [ ] All source code in `app/` directory
-- [ ] `README.md` has clear setup instructions
-- [ ] No `.env` file committed (only `.env.example`)
-- [ ] No hardcoded secrets in code
-- [ ] Public URL is accessible and working
-- [ ] Screenshots included in `screenshots/` folder
-- [ ] Repository has clear commit history
+- [x] Repository is public (or instructor has access)
+- [x] `MISSION_ANSWERS.md` completed with all exercises
+- [x] `DEPLOYMENT.md` has working public URL
+- [x] All source code in `app/` directory
+- [x] `README.md` has clear setup instructions
+- [x] No `.env` file committed (only `.env.example`)
+- [x] No hardcoded secrets in code
+- [x] Public URL is accessible and working
+- [x] Screenshots included in `screenshots/` folder
+- [x] Repository has clear commit history
 
 ---
 
@@ -162,28 +190,28 @@ Before submitting, verify your deployment:
 
 ```bash
 # 1. Health check
-curl https://your-app.railway.app/health
+curl https://language-tutor-service-production.up.railway.app/health
 
 # 2. Authentication required
-curl https://your-app.railway.app/ask
+curl https://language-tutor-service-production.up.railway.app/ask
 # Should return 401
 
 # 3. With API key works
-curl -H "X-API-Key: YOUR_KEY" https://your-app.railway.app/ask \
+curl -H "X-API-Key: YOUR_KEY" https://language-tutor-service-production.up.railway.app/ask \
   -X POST -d '{"user_id":"test","question":"Hello"}'
 # Should return 200
 
 # 4. Rate limiting
-for i in {1..15}; do 
-  curl -H "X-API-Key: YOUR_KEY" https://your-app.railway.app/ask \
-    -X POST -d '{"user_id":"test","question":"test"}'; 
+for i in {1..15}; do
+  curl -H "X-API-Key: YOUR_KEY" https://language-tutor-service-production.up.railway.app/ask \
+    -X POST -d '{"user_id":"test","question":"test"}';
 done
 # Should eventually return 429
-```
+````
 
 ---
 
-##  Submission
+## Submission
 
 **Submit your GitHub repository URL:**
 
@@ -195,7 +223,7 @@ https://github.com/your-username/day12-agent-deployment
 
 ---
 
-##  Quick Tips
+## Quick Tips
 
 1.  Test your public URL from a different device
 2.  Make sure repository is public or instructor has access
@@ -206,7 +234,7 @@ https://github.com/your-username/day12-agent-deployment
 
 ---
 
-##  Need Help?
+## Need Help?
 
 - Check [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 - Review [CODE_LAB.md](CODE_LAB.md)
